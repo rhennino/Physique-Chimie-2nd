@@ -97,7 +97,7 @@
     <h2>TP12 : Étude de la dispersion des mesures</h2>
 
     <div class="card">
-      <div class="grid-inputs">
+      <form class="grid-inputs" onsubmit="ajouterMesure(); return false;">
         <div>
           <label>Instrument :</label>
           <select id="instrument">
@@ -118,7 +118,7 @@
         <div>
           <button onclick="ajouterMesure()">Valider mesures</button>
         </div>
-      </div>
+      </form>
     </div>
 
     <div id="graphiques">
@@ -144,9 +144,24 @@
       </div>
     </div>
 
+    <div class="card" style="margin-top: 20px">
+      <h3>Historique des données et corrections</h3>
+      <table id="tableau-recap" style="width: 100%; border-collapse: collapse; font-size: 0.9rem">
+        <thead>
+          <tr style="background-color: #2c3e50; color: white">
+            <th style="padding: 10px; border: 1px solid #ddd">Instrument</th>
+            <th style="padding: 10px; border: 1px solid #ddd">Valeur (g)</th>
+            <th style="padding: 10px; border: 1px solid #ddd">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="corps-tableau"></tbody>
+      </table>
+    </div>
+
     <script>
       const donneesBrutes = { becher: [], eprouvette: [], pipette_graduee: [], pipette_jaugee: [] };
       const charts = {};
+      let globalId = 0; // Pour identifier chaque mesure de façon unique
 
       function initCharts() {
         const config = {
@@ -160,15 +175,7 @@
           const ctx = document.getElementById(`chart-${inst}`).getContext("2d");
           charts[inst] = new Chart(ctx, {
             type: "scatter",
-            data: {
-              datasets: [
-                {
-                  data: [],
-                  backgroundColor: config[inst].color,
-                  pointRadius: 7
-                }
-              ]
-            },
+            data: { datasets: [{ data: [], backgroundColor: config[inst].color, pointRadius: 7 }] },
             options: {
               responsive: true,
               maintainAspectRatio: false,
@@ -187,46 +194,94 @@
         const v1 = parseFloat(document.getElementById("m1").value);
         const v2 = parseFloat(document.getElementById("m2").value);
 
-        if (isNaN(v1) || isNaN(v2)) return;
+        // Ajout sous forme d'objet pour pouvoir éditer/supprimer précisément
+        if (!isNaN(v1)) donneesBrutes[inst].push({ id: globalId++, val: v1 });
+        if (!isNaN(v2)) donneesBrutes[inst].push({ id: globalId++, val: v2 });
 
-        donneesBrutes[inst].push(v1, v2);
         majAffichage(inst);
+        majTableau();
 
         document.getElementById("m1").value = "";
         document.getElementById("m2").value = "";
       }
 
-      function majAffichage(inst) {
-        const vals = donneesBrutes[inst];
+      function majTableau() {
+        const corps = document.getElementById("corps-tableau");
+        corps.innerHTML = "";
+        const labels = { becher: "Bécher", eprouvette: "Éprouvette", pipette_graduee: "Pipette Graduée", pipette_jaugee: "Pipette Jaugée" };
 
-        // 1. Mise à jour Graphique (Points par effectifs)
+        Object.keys(donneesBrutes).forEach((inst) => {
+          donneesBrutes[inst].forEach((item) => {
+            const row = corps.insertRow();
+            row.innerHTML = `
+                <td style="padding: 8px; border: 1px solid #ddd;">${labels[inst]}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">
+                    <input type="number" step="0.01" value="${item.val}" 
+                           onchange="editerMesure('${inst}', ${item.id}, this.value)" 
+                           style="width: 80px; padding: 5px;">
+                </td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                    <button onclick="supprimerMesure('${inst}', ${item.id})" 
+                            style="background-color: #e74c3c; padding: 5px 10px; font-size: 0.8rem; width: auto; min-width: 80px;">
+                        Supprimer
+                    </button>
+                </td>
+            `;
+          });
+        });
+      }
+
+      function editerMesure(inst, id, nouvelleValeur) {
+        const val = parseFloat(nouvelleValeur);
+        if (isNaN(val)) return;
+        const index = donneesBrutes[inst].findIndex((m) => m.id === id);
+        if (index !== -1) {
+          donneesBrutes[inst][index].val = val;
+          majAffichage(inst);
+        }
+      }
+
+      function supprimerMesure(inst, id) {
+        donneesBrutes[inst] = donneesBrutes[inst].filter((m) => m.id !== id);
+        majAffichage(inst);
+        majTableau();
+      }
+
+      function majAffichage(inst) {
+        const items = donneesBrutes[inst];
+        const vals = items.map((i) => i.val); // Extraction des valeurs pour Chart.js et stats
+
         const counts = {};
         vals.forEach((v) => {
           const rounded = Math.round(v * 100) / 100;
           counts[rounded] = (counts[rounded] || 0) + 1;
         });
+
         charts[inst].data.datasets[0].data = Object.keys(counts).map((m) => ({ x: parseFloat(m), y: counts[m] }));
         charts[inst].update();
 
-        // 2. Calculs Statistiques
         const n = vals.length;
-        const moy = vals.reduce((a, b) => a + b) / n;
-        const etendue = Math.max(...vals) - Math.min(...vals);
+        const statsDiv = document.getElementById(`stats-${inst}`);
 
-        // Calcul de l'écart-type (Dispersion)
+        if (n === 0) {
+          statsDiv.innerHTML = "<i>Aucune mesure</i>";
+          return;
+        }
+
+        const moy = vals.reduce((a, b) => a + b, 0) / n;
+        const etendue = Math.max(...vals) - Math.min(...vals);
         const variance = vals.reduce((acc, val) => acc + Math.pow(val - moy, 2), 0) / n;
         const dispersion = Math.sqrt(variance);
 
-        document.getElementById(`stats-${inst}`).innerHTML = `
-                <span class="stat-item">Mesures : <b>${n}</b></span>
-                <span class="stat-item">Moyenne : <b>${moy.toFixed(3)} g</b></span>
-                <span class="stat-item">Étendue : <b>${etendue.toFixed(3)} g</b></span>
-                <span class="stat-item dispersion-highlight">Dispersion (σ) : <b>${dispersion.toFixed(3)} g</b></span>
-            `;
+        statsDiv.innerHTML = `
+        <span class="stat-item">Mesures : <b>${n}</b></span>
+        <span class="stat-item">Moyenne : <b>${moy.toFixed(3)} mL</b></span>
+        <span class="stat-item">Étendue : <b>${etendue.toFixed(3)} mL</b></span>
+        <span class="stat-item dispersion-highlight">Dispersion (σ) : <b>${dispersion.toFixed(3)} mL</b></span>
+    `;
       }
 
       window.onload = initCharts;
     </script>
   </body>
 </html>
-
