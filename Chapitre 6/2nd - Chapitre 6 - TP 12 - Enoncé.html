@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TP 12 - La verrerie est-elle fiable ?</title>
+    <style>
+      /* Configuration de la page pour l'impression */
+      @page {
+        size: A4;
+        margin: 1.5cm;
+      }
+
+      body {
+        font-family: "Palatino Linotype", "Palatino", "Book Antiqua", serif;
+        line-height: 1.4;
+        color: #2c3e50;
+        max-width: 800px;
+        margin: auto;
+        padding-bottom: 50px;
+      }
+
+      header {
+        text-align: center;
+        border-bottom: 3px solid #2c3e50;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+      }
+
+      h1 {
+        margin: 5px 0;
+        text-transform: uppercase;
+        font-size: 1.5em;
+      }
+      h2 {
+        color: #d35400;
+        border-left: 5px solid #d35400;
+        padding-left: 10px;
+        margin-top: 20px;
+        font-size: 1.2em;
+      }
+
+      .objectifs {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        font-size: 0.9em;
+      }
+
+      .mission {
+        background-color: #fdf2e9;
+        border: 2px dashed #d35400;
+        padding: 12px;
+        margin: 15px 0;
+        font-style: italic;
+      }
+
+      table {
+        width: 98%; /* Sécurité pour éviter le rognage à droite */
+        margin: 15px auto;
+        border-collapse: collapse;
+        table-layout: fixed; /* Force le respect des dimensions */
+        word-wrap: break-word;
+        font-size: 0.9em;
+      }
+
+      th,
+      td {
+        border: 1px solid #7f8c8d;
+        padding: 8px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      /* Éviter la coupure des questions et des blocs de réponse */
+      .question-block {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        margin-bottom: 10px;
+        break-inside: avoid; /* Empêche la coupure au milieu d'un bloc */
+      }
+
+      .question {
+        margin: 10px 0 5px 0;
+        font-weight: bold;
+      }
+
+      .reponse-box {
+        border: 1px solid #bdc3c7;
+        height: 90px;
+        background-color: #fbfbfb;
+      }
+
+      .instruction-tableau {
+        color: #c0392b;
+        font-weight: bold;
+        text-align: center;
+        font-size: 0.9em;
+        margin: 5px 0;
+      }
+
+      footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 0.8em;
+        color: #7f8c8d;
+        border-top: 1px solid #eee;
+        padding-top: 5px;
+        background: white;
+      }
+
+      @media print {
+        .reponse-box {
+          background-color: transparent;
+        }
+        footer {
+          position: fixed;
+          bottom: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>TP N°12 : La verrerie est-elle toujours fiable ?</h1>
+    </header>
+
+    <section class="objectifs">
+      <strong>Objectifs de la séance :</strong>
+      <ul>
+        <li>Manipuler en sécurité la verrerie de laboratoire et respecter les gestes techniques.</li>
+        <li>Comprendre que certains instruments de mesure sont plus précis que d'autres.</li>
+        <li>Utiliser une balance de précision pour valider une mesure de volume.</li>
+        <li>Analyser la variabilité et la dispersion des résultats d'une classe.</li>
+      </ul>
+    </section>
+
+    <section class="mission">
+      <strong>DÉFI : L'USINE À PRÉCISION</strong><br />
+      "Vous venez d'être recrutés par un laboratoire pharmaceutique de l'Isle d'Abeau. Vous devez préparer une dose de principe actif liquide de <strong>20,0 mL</strong>. <br /><br />
+      • Si la dose < 19,5 mL : elle est inefficace.<br />
+      • Si la dose > 20,5 mL : elle devient toxique.<br /><br />
+      <strong>Votre mission :</strong> Identifier l'instrument de verrerie le plus fiable pour garantir que 100% de la production sera conforme."
+    </section>
+
+    <h2>I. Phase de Test : Contrôle Qualité</h2>
+
+    <p>Pour chaque instrument, prélevez ...... mL d'eau distillée, puis mesurez la masse prélevée à l'aide de la balance de précision (rappel : 1,00 mL d'eau pèse 1,00 g).</p>
+    <p class="instruction-tableau">👉 Une fois vos deux essais réalisés, allez noter vos résultats au tableau pour la mise en commun.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Instrument utilisé</th>
+          <th>Essai 1 (g)</th>
+          <th>Essai 2 (g)</th>
+          <th>Moyenne (g)<br /><small>(À remplir après mise en commun)</small></th>
+          <th>Dispersion (g)<br /><small>(Écart-type ou Étendue)</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Bécher</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>Éprouvette graduée</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>Pipette graduée</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><strong>Pipette jaugée</strong></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="question-block">
+      <div class="question">1. En observant les résultats de toute la classe au tableau, quel instrument présente la plus grande dispersion ?</div>
+      <div class="reponse-box"></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question">2. Quel est l'instrument à bannir pour préparer votre médicament ? Pourquoi ?</div>
+      <div class="reponse-box"></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question">3. Conclusion : Quel instrument garantit la conformité de la production (entre 19,5 g et 20,5 g) ?</div>
+      <div class="reponse-box"></div>
+    </div>
+
+    <h2>II. Expertise : Le Compte-gouttes de précision</h2>
+
+    <p>
+      Le laboratoire souhaite commercialiser une version "nourisson" dont la dose se mesure en gouttes. Pour cela, nous devons connaître le volume exact d'une seule goutte d'eau délivrée par votre
+      matériel.
+    </p>
+
+    <div class="question">PROBLÈME : Comment mesurer le volume d'une goutte alors que la balance et la verrerie ne sont pas assez précises pour une seule unité ?</div>
+
+    <div class="question">4. Proposez un protocole expérimental permettant d'obtenir le volume d'une goutte avec deux chiffres significatifs :</div>
+    <div class="reponse-box"></div>
+
+    <div class="question">5. Réalisez l'expérience, notez vos mesures et calculez le volume moyen d'une goutte (V<sub>goutte</sub>) :</div>
+    <div class="reponse-box"></div>
+
+    <footer>Physique-Chimie Classe de 2nde | Chapitre 6 : Transformation chimique</footer>
+
+    <script>
+      // Petit script pour améliorer le rendu des notations scientifiques si besoin
+      document.body.innerHTML = document.body.innerHTML
+        .replace(/V_goutte/g, "V<sub>goutte</sub>")
+        .replace(/mL/g, " mL")
+        .replace(/degC/g, "°C");
+    </script>
+  </body>
+</html>
