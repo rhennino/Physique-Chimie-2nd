@@ -1,1 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analyse de la dispersion - Physique-Chimie</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: #f8f9fa;
+        color: #212529;
+        max-width: 950px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .card {
+        background: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 0px;
+        border: 1px solid #e9ecef;
+      }
+      .grid-inputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        align-items: end;
+      }
+      label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        display: block;
+      }
+      select,
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #2c3e50;
+        color: white;
+        cursor: pointer;
+        border: none;
+        font-weight: bold;
+        transition: 0.2s;
+      }
+      button:hover {
+        background-color: #34495e;
+      }
+      #graphiques {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Deux colonnes égales */
+        gap: 15px; /* Espace entre les graphiques */
+        margin-top: 20px;
+      }
+      /* On réduit un peu la hauteur pour que tout tienne à l'écran */
+      .chart-container {
+        position: relative;
+        height: 150px;
+        width: 100%;
+      }
+      h2 {
+        text-align: center;
+        color: #2c3e50;
+      }
+      .stats {
+        font-size: 0.9rem;
+        color: #495057;
+        margin-top: 10px;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      .stat-item {
+        background: #e9ecef;
+        padding: 4px 10px;
+        border-radius: 4px;
+      }
+      .dispersion-highlight {
+        background: #d4edda;
+        color: #155724;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>TP12 : Étude de la dispersion des mesures</h2>
+
+    <div class="card">
+      <div class="grid-inputs">
+        <div>
+          <label>Instrument :</label>
+          <select id="instrument">
+            <option value="becher">Bécher</option>
+            <option value="eprouvette">Éprouvette graduée</option>
+            <option value="pipette_graduee">Pipette graduée</option>
+            <option value="pipette_jaugee">Pipette jaugée</option>
+          </select>
+        </div>
+        <div>
+          <label>Mesure 1 (g) :</label>
+          <input type="number" id="m1" step="0.01" placeholder="Ex: 10.05" />
+        </div>
+        <div>
+          <label>Mesure 2 (g) :</label>
+          <input type="number" id="m2" step="0.01" placeholder="Ex: 9.98" />
+        </div>
+        <div>
+          <button onclick="ajouterMesure()">Valider mesures</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="graphiques">
+      <div class="card">
+        <h3>Bécher</h3>
+        <div class="chart-container"><canvas id="chart-becher"></canvas></div>
+        <div id="stats-becher" class="stats"></div>
+      </div>
+      <div class="card">
+        <h3>Éprouvette graduée</h3>
+        <div class="chart-container"><canvas id="chart-eprouvette"></canvas></div>
+        <div id="stats-eprouvette" class="stats"></div>
+      </div>
+      <div class="card">
+        <h3>Pipette graduée</h3>
+        <div class="chart-container"><canvas id="chart-pipette_graduee"></canvas></div>
+        <div id="stats-pipette_graduee" class="stats"></div>
+      </div>
+      <div class="card">
+        <h3>Pipette jaugée</h3>
+        <div class="chart-container"><canvas id="chart-pipette_jaugee"></canvas></div>
+        <div id="stats-pipette_jaugee" class="stats"></div>
+      </div>
+    </div>
+
+    <script>
+      const donneesBrutes = { becher: [], eprouvette: [], pipette_graduee: [], pipette_jaugee: [] };
+      const charts = {};
+
+      function initCharts() {
+        const config = {
+          becher: { label: "Bécher", color: "#6c757d" },
+          eprouvette: { label: "Éprouvette", color: "#007bff" },
+          pipette_graduee: { label: "Pip. Graduée", color: "#f39c12" },
+          pipette_jaugee: { label: "Pip. Jaugée", color: "#27ae60" }
+        };
+
+        Object.keys(config).forEach((inst) => {
+          const ctx = document.getElementById(`chart-${inst}`).getContext("2d");
+          charts[inst] = new Chart(ctx, {
+            type: "scatter",
+            data: {
+              datasets: [
+                {
+                  data: [],
+                  backgroundColor: config[inst].color,
+                  pointRadius: 7
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: { beginAtZero: true, title: { display: true, text: "Effectif" }, ticks: { stepSize: 1 } },
+                x: { title: { display: true, text: "Masse (g)" } }
+              },
+              plugins: { legend: { display: false } }
+            }
+          });
+        });
+      }
+
+      function ajouterMesure() {
+        const inst = document.getElementById("instrument").value;
+        const v1 = parseFloat(document.getElementById("m1").value);
+        const v2 = parseFloat(document.getElementById("m2").value);
+
+        if (isNaN(v1) || isNaN(v2)) return;
+
+        donneesBrutes[inst].push(v1, v2);
+        majAffichage(inst);
+
+        document.getElementById("m1").value = "";
+        document.getElementById("m2").value = "";
+      }
+
+      function majAffichage(inst) {
+        const vals = donneesBrutes[inst];
+
+        // 1. Mise à jour Graphique (Points par effectifs)
+        const counts = {};
+        vals.forEach((v) => {
+          const rounded = Math.round(v * 100) / 100;
+          counts[rounded] = (counts[rounded] || 0) + 1;
+        });
+        charts[inst].data.datasets[0].data = Object.keys(counts).map((m) => ({ x: parseFloat(m), y: counts[m] }));
+        charts[inst].update();
+
+        // 2. Calculs Statistiques
+        const n = vals.length;
+        const moy = vals.reduce((a, b) => a + b) / n;
+        const etendue = Math.max(...vals) - Math.min(...vals);
+
+        // Calcul de l'écart-type (Dispersion)
+        const variance = vals.reduce((acc, val) => acc + Math.pow(val - moy, 2), 0) / n;
+        const dispersion = Math.sqrt(variance);
+
+        document.getElementById(`stats-${inst}`).innerHTML = `
+                <span class="stat-item">Mesures : <b>${n}</b></span>
+                <span class="stat-item">Moyenne : <b>${moy.toFixed(3)} g</b></span>
+                <span class="stat-item">Étendue : <b>${etendue.toFixed(3)} g</b></span>
+                <span class="stat-item dispersion-highlight">Dispersion (σ) : <b>${dispersion.toFixed(3)} g</b></span>
+            `;
+      }
+
+      window.onload = initCharts;
+    </script>
+  </body>
+</html>
 
